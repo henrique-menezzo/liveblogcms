@@ -2,16 +2,17 @@
 
 import { useState } from "react";
 import { Avatar, Button, EditorStatusBadge } from "./ui";
-import { ChevronDown, CloseIcon, TrashIcon } from "./icons";
+import { CalendarIcon, ChevronDown, CloseIcon, TrashIcon } from "./icons";
 import { RichTextEditor } from "./RichTextEditor";
 import { PendingFor } from "./PendingFor";
 import { AUTHORS, CURRENT_USER_PID } from "@/lib/mock-data";
-import type { PostKind } from "@/lib/post-helpers";
+import { formatScheduleBadge, type PostKind } from "@/lib/post-helpers";
 
 export interface ComposerState {
   authorPID: string;
   title: string;
   body: string; // rich-text HTML
+  scheduledFor?: string; // datetime-local value ("YYYY-MM-DDTHH:mm")
 }
 
 const TITLE_MAX = 140;
@@ -26,6 +27,8 @@ export function PostComposer({
   postNumber,
   kind,
   pendingSince,
+  savedScheduledFor,
+  canSchedule,
   primaryLabel,
   onPrimary,
   secondaryLabel,
@@ -39,6 +42,8 @@ export function PostComposer({
   postNumber?: number;
   kind?: PostKind | null;
   pendingSince?: string | null;
+  savedScheduledFor?: string | null;
+  canSchedule?: boolean;
   primaryLabel: string;
   onPrimary: () => void;
   secondaryLabel: string;
@@ -61,7 +66,12 @@ export function PostComposer({
           <h2 className="text-base font-semibold">
             {isEdit ? `Edit Post: #${postNumber}` : "New Post"}
           </h2>
-          {isEdit && kind && <EditorStatusBadge kind={kind} />}
+          {isEdit && kind && (
+            <EditorStatusBadge
+              kind={kind}
+              scheduledFor={kind === "scheduled" && savedScheduledFor ? formatScheduleBadge(savedScheduledFor) : undefined}
+            />
+          )}
         </div>
         <button onClick={onClose} className="text-subtle hover:text-ink" aria-label="Close">
           <CloseIcon className="w-4 h-4" />
@@ -147,6 +157,32 @@ export function PostComposer({
           </label>
           <RichTextEditor value={value.body} onChange={(html) => set({ body: html })} />
         </div>
+
+        {/* Schedule */}
+        {canSchedule && (
+          <div>
+            <label className="block text-sm font-semibold mb-1.5 text-label">Schedule post (optional)</label>
+            <div className="relative">
+              <CalendarIcon className="w-4 h-4 text-subtle absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="datetime-local"
+                value={value.scheduledFor ?? ""}
+                onChange={(e) => set({ scheduledFor: e.target.value })}
+                className="w-full rounded border border-line bg-white pl-9 pr-3 h-12 text-sm text-black focus:outline-none focus:ring-2 focus:ring-ink/10 focus:border-zinc-400"
+              />
+              {value.scheduledFor && (
+                <button
+                  type="button"
+                  onClick={() => set({ scheduledFor: "" })}
+                  className="absolute right-9 top-1/2 -translate-y-1/2 text-muted hover:text-ink"
+                  aria-label="Clear schedule"
+                >
+                  <CloseIcon className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Footer actions */}

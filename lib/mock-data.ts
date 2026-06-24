@@ -90,6 +90,19 @@ export const LIVE_BLOGS: LiveBlogSummary[] = [
 
 export const POSTS: Post[] = [
   {
+    pid: "p-0",
+    postNumber: 191,
+    title: "Embargoed: Full Transcript Of Tonight's Address",
+    body: "<p>The complete remarks are set to go live the moment the address begins.</p>",
+    authors: [{ pid: "a-1", name: "Paul Snyder", isPrimary: true }],
+    status: { mid: "draft", name: "Draft" },
+    reviewStatus: "approved",
+    publishedAt: null,
+    createdAt: "2026-06-17T22:30:00",
+    relativeTime: "Just now",
+    scheduledFor: new Date(Date.now() + 26 * 60 * 60 * 1000).toISOString(),
+  },
+  {
     pid: "p-1",
     postNumber: 190,
     title: "The One Line In Iran's Proposal That Made Trump 'Throw It Away'",

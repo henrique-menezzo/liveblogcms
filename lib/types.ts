@@ -57,6 +57,7 @@ export interface Post {
   relativeTime: string;
   pinned?: boolean;
   pendingSince?: string | null; // when the post entered review (drives "Pending for …")
+  scheduledFor?: string | null; // future publish time (drives the "Scheduled" badge/filter)
 }
 
 // §3 — Live blog config that drives the review/publish state machine

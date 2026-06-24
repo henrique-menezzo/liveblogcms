@@ -7,10 +7,11 @@ export type Role = "editor" | "reporter";
 
 // The 4 persisted post states (a 5th, transient state — the unsaved "new post"
 // in the composer — never becomes a Post, so it isn't modeled here).
-export type PostKind = "pending" | "published" | "rejected" | "draft";
+export type PostKind = "pending" | "published" | "rejected" | "draft" | "scheduled";
 
 export function getPostKind(post: Post): PostKind {
   if (post.status.mid === "published") return "published";
+  if (post.scheduledFor && new Date(post.scheduledFor).getTime() > Date.now()) return "scheduled";
   if (post.reviewStatus === "pending") return "pending";
   if (post.reviewStatus === "rejected") return "rejected";
   return "draft";
@@ -40,6 +41,16 @@ export function formatElapsed(sinceISO: string): string {
   if (hr < 24) return rem ? `${hr} hr ${rem} min` : `${hr} hr`;
   const d = Math.floor(hr / 24);
   return `${d} day${d > 1 ? "s" : ""}`;
+}
+
+// "10/18/2026 10:00AM" — the scheduled-post badge label (Figma "Tag").
+export function formatScheduleBadge(iso: string): string {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  let h = d.getHours();
+  const ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  return `${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${d.getFullYear()} ${h}:${pad(d.getMinutes())}${ampm}`;
 }
 
 // Compact form for the feed's "Pending: 3h ago" badge.

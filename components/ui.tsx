@@ -39,10 +39,19 @@ export function StatusBadge({ status }: { status: StatusMID }) {
 export function EditorStatusBadge({
   kind,
   pendingFor,
+  scheduledFor,
 }: {
-  kind: "pending" | "published" | "rejected" | "draft";
+  kind: "pending" | "published" | "rejected" | "draft" | "scheduled";
   pendingFor?: string;
+  scheduledFor?: string;
 }) {
+  if (scheduledFor) {
+    return (
+      <span className="inline-flex items-center rounded px-2 py-0.5 text-xs font-semibold bg-[#92c0dd] text-[#0a0909]">
+        {scheduledFor}
+      </span>
+    );
+  }
   const map = {
     pending: {
       label: pendingFor ? `Pending: ${pendingFor}` : "Pending",
@@ -51,6 +60,7 @@ export function EditorStatusBadge({
     published: { label: "Published", cls: "bg-[#bbf7d0] text-[#05603a]" },
     rejected: { label: "Rejected", cls: "bg-[#fbd5d5] text-[#b42318]" },
     draft: { label: "Draft", cls: "bg-canvas text-subtle border border-line" },
+    scheduled: { label: "Scheduled", cls: "bg-[#92c0dd] text-[#0a0909]" },
   }[kind];
   return (
     <span className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-semibold ${map.cls}`}>

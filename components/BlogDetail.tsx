@@ -18,6 +18,15 @@ const EMPTY_COMPOSER: ComposerState = {
   authorPID: CURRENT_USER_PID,
   title: "",
   body: "",
+  scheduledFor: "",
+};
+
+// ISO ↔ <input type="datetime-local"> ("YYYY-MM-DDTHH:mm") conversions.
+const toInputDate = (iso?: string | null) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
 export function BlogDetail({ blog, initialPosts }: { blog: LiveBlogSummary; initialPosts: Post[] }) {
@@ -103,6 +112,7 @@ export function BlogDetail({ blog, initialPosts }: { blog: LiveBlogSummary; init
         authorPID: editingPost.authors[0]?.pid ?? CURRENT_USER_PID,
         title: editingPost.title,
         body: editingPost.body,
+        scheduledFor: toInputDate(editingPost.scheduledFor),
       });
     } else {
       setComposer(EMPTY_COMPOSER);
@@ -228,23 +238,41 @@ export function BlogDetail({ blog, initialPosts }: { blog: LiveBlogSummary; init
   };
 
   const onSecondary = () =>
-    commit({ status: { mid: "draft", name: "Draft" }, reviewStatus: null, publishedAt: null }, "Saved as draft");
+    commit(
+      { status: { mid: "draft", name: "Draft" }, reviewStatus: null, publishedAt: null, scheduledFor: null },
+      "Saved as draft"
+    );
+
+  const scheduledISO = useMemo(() => {
+    if (!composer.scheduledFor) return null;
+    const d = new Date(composer.scheduledFor);
+    return d.getTime() > Date.now() ? d.toISOString() : null;
+  }, [composer.scheduledFor]);
 
   const onPrimary = () => {
-    if (canPublishDirect) {
+    if (canPublishDirect && scheduledISO) {
+      // Editor schedules a future publish — approved, but not live yet.
+      commit(
+        {
+          status: { mid: "draft", name: "Draft" },
+          reviewStatus: "approved", publishedAt: null, scheduledFor: scheduledISO,
+        },
+        "Post scheduled"
+      );
+    } else if (canPublishDirect) {
       // Editor (or approvals disabled): publish / re-publish directly.
       commit(
         {
           status: { mid: "published", name: "Published" },
           reviewStatus: kind === "pending" ? "approved" : config.requirePostApprovals ? "bypassed" : "approved",
-          publishedAt: nowISO(), relativeTime: "Just now",
+          publishedAt: nowISO(), relativeTime: "Just now", scheduledFor: null,
         },
         "Post published"
       );
     } else {
       // Reporter: submit for review → pending.
       commit(
-        { status: { mid: "draft", name: "Draft" }, reviewStatus: "pending", publishedAt: null, relativeTime: "Just now", pendingSince: nowISO() },
+        { status: { mid: "draft", name: "Draft" }, reviewStatus: "pending", publishedAt: null, relativeTime: "Just now", pendingSince: nowISO(), scheduledFor: null },
         "Submitted for review"
       );
     }
@@ -351,6 +379,8 @@ export function BlogDetail({ blog, initialPosts }: { blog: LiveBlogSummary; init
                       postNumber={editingPost?.postNumber}
                       kind={kind}
                       pendingSince={editingPost?.pendingSince}
+                      savedScheduledFor={editingPost?.scheduledFor}
+                      canSchedule={canPublishDirect}
                       primaryLabel={primaryLabel}
                       onPrimary={onPrimary}
                       secondaryLabel={secondaryLabel}

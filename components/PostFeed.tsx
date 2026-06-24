@@ -9,10 +9,10 @@ import { PromotionCardPreview } from "./PromotionCardModal";
 import type { ComposerState } from "./PostComposer";
 import { Fragment } from "react";
 import { AUTHORS, CURRENT_USER_PID } from "@/lib/mock-data";
-import { canManagePost, formatElapsedShort, getPostKind, type Ad, type PostKind, type PromotionCard } from "@/lib/post-helpers";
+import { canManagePost, formatElapsedShort, formatScheduleBadge, getPostKind, type Ad, type PostKind, type PromotionCard } from "@/lib/post-helpers";
 
 type Scope = "all" | "mine";
-type StatusFilter = "all" | "pending" | "published" | "rejected" | "draft";
+type StatusFilter = "all" | "pending" | "published" | "rejected" | "draft" | "scheduled";
 
 export interface PostActions {
   onApprove: (post: Post) => void;
@@ -74,7 +74,7 @@ export function PostFeed({
   }, [posts, scope]);
 
   const statusCounts = useMemo(() => {
-    const c: Record<StatusFilter, number> = { all: scoped.length, pending: 0, published: 0, rejected: 0, draft: 0 };
+    const c: Record<StatusFilter, number> = { all: scoped.length, pending: 0, published: 0, rejected: 0, draft: 0, scheduled: 0 };
     for (const p of scoped) c[getPostKind(p)]++;
     return c;
   }, [scoped]);
@@ -136,6 +136,7 @@ export function PostFeed({
             options={[
               { value: "all", label: `All statuses (${statusCounts.all})` },
               { value: "pending", label: `Pending (${statusCounts.pending})` },
+              { value: "scheduled", label: `Scheduled (${statusCounts.scheduled})` },
               { value: "published", label: `Published (${statusCounts.published})` },
               { value: "rejected", label: `Rejected (${statusCounts.rejected})` },
               { value: "draft", label: `Draft (${statusCounts.draft})` },
@@ -259,6 +260,7 @@ function FeedItem({
               <EditorStatusBadge
                 kind={kind}
                 pendingFor={kind === "pending" && post.pendingSince ? formatElapsedShort(post.pendingSince) : undefined}
+                scheduledFor={kind === "scheduled" && post.scheduledFor ? formatScheduleBadge(post.scheduledFor) : undefined}
               />
             </div>
             <div className={`flex items-center gap-1.5 transition ${showChrome ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
@@ -476,7 +478,7 @@ const AdSenseGlyph = () => (
 );
 
 function statusLabel(s: StatusFilter): string {
-  return { all: "All statuses", pending: "Pending", published: "Published", rejected: "Rejected", draft: "Draft" }[s];
+  return { all: "All statuses", pending: "Pending", published: "Published", rejected: "Rejected", draft: "Draft", scheduled: "Scheduled" }[s];
 }
 
 // re-exported so BlogDetail can type the actions object
