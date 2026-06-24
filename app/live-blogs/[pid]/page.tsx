@@ -3,6 +3,10 @@ import { TopBar } from "@/components/TopBar";
 import { BlogDetail } from "@/components/BlogDetail";
 import { LIVE_BLOGS, POSTS } from "@/lib/mock-data";
 
+export function generateStaticParams() {
+  return LIVE_BLOGS.map((b) => ({ pid: b.pid }));
+}
+
 // §4 — Live Blog Details (/live-blogs/{liveBlogPID})
 // Tabs: Live/Posts (default), Analytics, Config. Title + status shown above tabs.
 export default function LiveBlogDetailPage({
