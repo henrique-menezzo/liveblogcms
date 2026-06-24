@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { Avatar } from "./ui";
 import { DotsIcon, MutedIcon, PinIcon } from "./icons";
 
@@ -33,6 +34,18 @@ export function LiveBlogArticle({
 }) {
   // body is rich-text HTML; treat tag-only/empty markup as "no body".
   const hasBody = !!body && body.replace(/<[^>]*>/g, "").trim().length > 0;
+
+  // "Show more" only appears when the body overflows the 10-line clamp; it then
+  // expands/collapses the post.
+  const [expanded, setExpanded] = useState(false);
+  const [overflows, setOverflows] = useState(false);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = bodyRef.current;
+    if (!el || expanded) return;
+    setOverflows(el.scrollHeight > el.clientHeight + 1);
+  }, [body, expanded, mediaURL, title]);
+
   const surface = dark ? "bg-[#0a0909]" : "bg-feed";
   const titleColor = title ? (dark ? "text-[#fafafa]" : "text-black") : "text-muted";
   const timeColor = dark ? "text-[#fafafa]" : "text-black";
@@ -100,15 +113,26 @@ export function LiveBlogArticle({
       {/* Body — 16px / 24px Regular. Rich-text HTML from the editor. */}
       {hasBody && (
         <div
-          className={`px-4 text-base font-normal leading-6 ${bodyColor} [&_p]:my-1 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:underline [&_img]:rounded-md [&_img]:my-2`}
+          ref={bodyRef}
+          className={`px-4 text-base font-normal leading-6 ${bodyColor} [&_p]:my-1 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:underline [&_img]:rounded-md [&_img]:my-2 ${
+            expanded ? "" : "line-clamp-[10]"
+          }`}
           dangerouslySetInnerHTML={{ __html: body as string }}
         />
       )}
 
-      {/* Show more */}
-      {!placeholder && hasBody && (
+      {/* Show more — only when the body exceeds 10 lines */}
+      {!placeholder && hasBody && overflows && (
         <div className="text-center">
-          <button className={`text-sm font-normal underline ${metaColor}`}>Show more</button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setExpanded((v) => !v);
+            }}
+            className={`text-sm font-normal underline ${metaColor}`}
+          >
+            {expanded ? "Show less" : "Show more"}
+          </button>
         </div>
       )}
     </article>

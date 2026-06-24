@@ -106,7 +106,7 @@ export const POSTS: Post[] = [
     pid: "p-1",
     postNumber: 190,
     title: "The One Line In Iran's Proposal That Made Trump 'Throw It Away'",
-    body: "<p>President Trump said Thursday that he immediately rejected Iran's latest proposal after reading what he described as an unacceptable opening line related to Tehran's nuclear program.</p><p>Speaking to reporters, Trump said the proposal failed to satisfy his demand for a verifiable freeze.</p>",
+    body: "<p>President Trump said Thursday that he immediately rejected Iran's latest proposal after reading what he described as an unacceptable opening line related to Tehran's nuclear program.</p><p>Speaking to reporters, Trump said the proposal failed to satisfy his demand for a verifiable freeze.</p><p>\"Well I looked at it and if I don't like the first sentence I just throw it away,\" Trump said. \"They fully agreed — no nuclear. And if they have any nuclear of any form, I don't read the rest of the letter.\"</p><p>The president added that negotiators on both sides had been told the timeline would not slip again, and that allied governments had been briefed on the contents ahead of the announcement.</p><p>Officials familiar with the talks said sanctions relief remains the central sticking point, with sequencing still unresolved after several rounds of closed-door sessions.</p><p>A senior State Department aide declined to confirm whether a follow-up meeting had been scheduled, saying only that channels remained open.</p>",
     authors: [{ pid: "a-2", name: "Ben Shapiro", isPrimary: true }],
     status: { mid: "draft", name: "Draft" },
     reviewStatus: "pending",
