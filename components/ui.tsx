@@ -104,7 +104,7 @@ export function Button({ variant = "outline", className = "", ...props }: BtnPro
   return <button className={`${base} ${variants[variant]} ${className}`} {...props} />;
 }
 
-export function Avatar({ name, src, size = 32 }: { name: string; src?: string; size?: number }) {
+export function Avatar({ name, src, size = 32, dark = false }: { name: string; src?: string; size?: number; dark?: boolean }) {
   const initials = name
     .split(" ")
     .map((n) => n[0])
@@ -113,7 +113,9 @@ export function Avatar({ name, src, size = 32 }: { name: string; src?: string; s
     .toUpperCase();
   return (
     <span
-      className="inline-flex items-center justify-center rounded-full bg-zinc-200 text-[11px] font-semibold text-zinc-600 overflow-hidden shrink-0"
+      className={`inline-flex items-center justify-center rounded-full text-[11px] font-semibold overflow-hidden shrink-0 ${
+        dark ? "bg-[#292929] text-zinc-300" : "bg-zinc-200 text-zinc-600"
+      }`}
       style={{ width: size, height: size }}
     >
       {src ? (

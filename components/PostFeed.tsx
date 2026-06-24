@@ -37,6 +37,7 @@ export function PostFeed({
   promos,
   onAddPromo,
   onRemovePromo,
+  dark = false,
 }: {
   posts: Post[];
   preview: ComposerState;
@@ -52,6 +53,7 @@ export function PostFeed({
   promos: PromotionCard[];
   onAddPromo: () => void;
   onRemovePromo: (id: string) => void;
+  dark?: boolean;
 }) {
   // Only posted cards render in the feed.
   const feedPromos = promos.filter((p) => p.inFeed);
@@ -176,7 +178,7 @@ export function PostFeed({
               <span className="text-[11px] font-medium text-muted">Not saved yet</span>
             </div>
             <div className="shadow-[0_6px_20px_rgba(0,0,0,0.10)] rounded-xl">
-              <LiveBlogArticle placeholder time="Just now" author={previewAuthor?.name} title={preview.title} body={preview.body} />
+              <LiveBlogArticle placeholder time="Just now" author={previewAuthor?.name} title={preview.title} body={preview.body} dark={dark} />
             </div>
           </div>
         )}
@@ -197,6 +199,7 @@ export function PostFeed({
               focused={focusedPid === post.pid}
               actions={actions}
               canReview={canReview}
+              dark={dark}
               onFocus={() => onFocus(post.pid)}
               registerRef={(el) => {
                 itemRefs.current[post.pid] = el;
@@ -223,6 +226,7 @@ function FeedItem({
   focused,
   actions,
   canReview,
+  dark,
   onFocus,
   registerRef,
 }: {
@@ -230,6 +234,7 @@ function FeedItem({
   focused: boolean;
   actions: PostActions;
   canReview: boolean;
+  dark?: boolean;
   onFocus: () => void;
   registerRef: (el: HTMLDivElement | null) => void;
 }) {
@@ -301,6 +306,7 @@ function FeedItem({
               body={post.body}
               mediaURL={post.mediaURL}
               pinned={post.pinned}
+              dark={dark}
             />
           </div>
 

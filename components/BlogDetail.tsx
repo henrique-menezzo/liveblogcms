@@ -7,7 +7,7 @@ import { PostComposer, type ComposerState } from "./PostComposer";
 import { PostFeed, type PostActions } from "./PostFeed";
 import { SettingsTab } from "./SettingsTab";
 import { PromotionCardModal } from "./PromotionCardModal";
-import { CodeIcon, UserIcon } from "./icons";
+import { CodeIcon, MoonIcon, SunIcon, UserIcon } from "./icons";
 import { useToast } from "./Toast";
 import { AUTHORS, CURRENT_USER_PID } from "@/lib/mock-data";
 import { canManagePost, getPostKind, nowISO, type Ad, type PromotionCard, type Role } from "@/lib/post-helpers";
@@ -45,6 +45,8 @@ export function BlogDetail({ blog, initialPosts }: { blog: LiveBlogSummary; init
   // Experience toggle: editors publish/approve directly; reporters submit for review.
   const [role, setRole] = useState<Role>("editor");
   const canReview = role === "editor";
+  // Preview-only theme for the post cards (light / dark), toggled from a floating control.
+  const [cardTheme, setCardTheme] = useState<"light" | "dark">("light");
   // AdSense slots inserted between posts.
   const [ads, setAds] = useState<Ad[]>([]);
   const insertAd = (afterPid: string | null) => {
@@ -414,6 +416,7 @@ export function BlogDetail({ blog, initialPosts }: { blog: LiveBlogSummary; init
                   promos={promos}
                   onAddPromo={() => setPromoModalOpen(true)}
                   onRemovePromo={removeFeedPromo}
+                  dark={cardTheme === "dark"}
                 />
               </div>
             </div>
@@ -432,6 +435,26 @@ export function BlogDetail({ blog, initialPosts }: { blog: LiveBlogSummary; init
           onSaveEdit={saveEditPromo}
           onDelete={deletePromo}
         />
+      )}
+
+      {tab === "posts" && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
+          <div className="inline-flex items-center gap-0.5 rounded-full border border-line bg-white p-1 shadow-[0_8px_24px_rgba(0,0,0,0.18)]">
+            {(["light", "dark"] as const).map((th) => (
+              <button
+                key={th}
+                onClick={() => setCardTheme(th)}
+                title={th === "light" ? "Light cards" : "Dark cards"}
+                aria-pressed={cardTheme === th}
+                className={`grid place-items-center w-8 h-8 rounded-full transition ${
+                  cardTheme === th ? "bg-black text-white" : "text-subtle hover:text-black"
+                }`}
+              >
+                {th === "light" ? <SunIcon className="w-4 h-4" /> : <MoonIcon className="w-4 h-4" />}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
