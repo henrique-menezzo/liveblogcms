@@ -33,6 +33,32 @@ export function StatusBadge({ status }: { status: StatusMID }) {
   );
 }
 
+// Status badge used by the editor flows (Figma): a post is one of the 4 kinds.
+// Pending = peach, Published = green, Rejected = pink, Draft = neutral.
+// For pending posts a `pendingFor` string renders as "Pending: 3h ago".
+export function EditorStatusBadge({
+  kind,
+  pendingFor,
+}: {
+  kind: "pending" | "published" | "rejected" | "draft";
+  pendingFor?: string;
+}) {
+  const map = {
+    pending: {
+      label: pendingFor ? `Pending: ${pendingFor}` : "Pending",
+      cls: "bg-[#fde6c7] text-[#9a5a00]",
+    },
+    published: { label: "Published", cls: "bg-[#bbf7d0] text-[#05603a]" },
+    rejected: { label: "Rejected", cls: "bg-[#fbd5d5] text-[#b42318]" },
+    draft: { label: "Draft", cls: "bg-canvas text-subtle border border-line" },
+  }[kind];
+  return (
+    <span className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-semibold ${map.cls}`}>
+      {map.label}
+    </span>
+  );
+}
+
 export function ReviewBadge({ status }: { status: ReviewStatusMID }) {
   if (!status) return null;
   const map: Record<string, string> = {

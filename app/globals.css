@@ -27,3 +27,21 @@ textarea {
   background: #d4d4d8;
   border-radius: 8px;
 }
+
+/* TipTap rich-text content styling (no typography plugin) */
+.ProseMirror :is(h2) { font-size: 1.15rem; font-weight: 600; margin: 0.4em 0; }
+.ProseMirror :is(h3) { font-size: 1rem; font-weight: 600; margin: 0.4em 0; }
+.ProseMirror p { margin: 0.35em 0; }
+.ProseMirror ul { list-style: disc; padding-left: 1.25rem; margin: 0.35em 0; }
+.ProseMirror ol { list-style: decimal; padding-left: 1.25rem; margin: 0.35em 0; }
+.ProseMirror a { color: #1d4ed8; text-decoration: underline; }
+.ProseMirror img { max-width: 100%; border-radius: 6px; margin: 0.4em 0; }
+.ProseMirror:focus { outline: none; }
+/* placeholder for empty editor */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: "Enter post body content...";
+  color: theme(colors.subtle);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

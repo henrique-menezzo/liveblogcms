@@ -44,8 +44,9 @@ export interface Author {
 
 export interface Post {
   pid: string;
+  postNumber: number; // human-facing "Post #190" identifier shown in the editor
   title: string;
-  body: string; // prototype: plain/HTML string; spec leaves WYSIWYG JSON as TBD (§9)
+  body: string; // rich-text HTML (TipTap); spec leaves WYSIWYG JSON as TBD (§9)
   authors: Author[];
   embedUrl?: string | null;
   mediaURL?: string;
@@ -55,6 +56,7 @@ export interface Post {
   createdAt: string;
   relativeTime: string;
   pinned?: boolean;
+  pendingSince?: string | null; // when the post entered review (drives "Pending for …")
 }
 
 // §3 — Live blog config that drives the review/publish state machine

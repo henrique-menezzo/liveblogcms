@@ -1,53 +1,79 @@
 "use client";
 
 import { useState } from "react";
-import { Avatar, Button } from "./ui";
-import { ChevronDown, CloseIcon, LinkIcon, UploadIcon } from "./icons";
+import { Avatar, Button, EditorStatusBadge } from "./ui";
+import { ChevronDown, CloseIcon, TrashIcon } from "./icons";
+import { RichTextEditor } from "./RichTextEditor";
+import { PendingFor } from "./PendingFor";
 import { AUTHORS, CURRENT_USER_PID } from "@/lib/mock-data";
+import type { PostKind } from "@/lib/post-helpers";
 
 export interface ComposerState {
   authorPID: string;
   title: string;
-  body: string;
-  embedUrl: string;
+  body: string; // rich-text HTML
 }
 
 const TITLE_MAX = 140;
 
-// Left "New Post" panel from the Figma — author, title, media, body, actions.
+// Left editor panel. In "new" mode the header reads "New Post"; in "edit" mode it
+// reads "Edit Post: #190" with the post's status badge inline (per Figma).
 export function PostComposer({
   value,
   onChange,
-  requireApproval,
-  onClear,
+  onClose,
   mode = "new",
+  postNumber,
+  kind,
+  pendingSince,
+  primaryLabel,
+  onPrimary,
+  secondaryLabel,
+  onSecondary,
+  onDelete,
 }: {
   value: ComposerState;
   onChange: (v: ComposerState) => void;
-  requireApproval: boolean;
-  onClear: () => void;
+  onClose: () => void;
   mode?: "new" | "edit";
+  postNumber?: number;
+  kind?: PostKind | null;
+  pendingSince?: string | null;
+  primaryLabel: string;
+  onPrimary: () => void;
+  secondaryLabel: string;
+  onSecondary: () => void;
+  onDelete?: () => void;
 }) {
   const isEdit = mode === "edit";
   const set = (patch: Partial<ComposerState>) => onChange({ ...value, ...patch });
   const [authorOpen, setAuthorOpen] = useState(false);
 
   const selected = AUTHORS.find((a) => a.pid === value.authorPID);
-  const selectedLabel = selected
-    ? selected.pid === CURRENT_USER_PID
-      ? "You (Host)"
-      : selected.name
-    : null;
+  const authorLabel = (pid: string, name: string, title?: string | null) =>
+    pid === CURRENT_USER_PID ? `${name} (You)` : title ? `${name} (${title})` : name;
 
   return (
-    <div className="border-r border-line flex flex-col min-h-0 bg-white">
+    <div className="h-full w-full border-r border-line flex flex-col min-h-0 bg-white">
       {/* Panel header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-line">
-        <h2 className="text-base font-semibold">{isEdit ? "Edit Post" : "New Post"}</h2>
-        <button onClick={onClear} className="text-subtle hover:text-ink" aria-label="Clear">
+        <div className="flex items-center gap-2">
+          <h2 className="text-base font-semibold">
+            {isEdit ? `Edit Post: #${postNumber}` : "New Post"}
+          </h2>
+          {isEdit && kind && <EditorStatusBadge kind={kind} />}
+        </div>
+        <button onClick={onClose} className="text-subtle hover:text-ink" aria-label="Close">
           <CloseIcon className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Pending-for indicator */}
+      {isEdit && kind === "pending" && pendingSince && (
+        <div className="px-5 pt-3">
+          <PendingFor since={pendingSince} />
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto scroll-thin px-5 py-4 space-y-4">
         {/* Author */}
@@ -65,16 +91,16 @@ export function PostComposer({
               {selected ? (
                 <>
                   <Avatar name={selected.name} size={28} />
-                  <span className="text-black">{selectedLabel}</span>
+                  <span className="text-black">{authorLabel(selected.pid, selected.name, selected.title)}</span>
                 </>
               ) : (
-                <span className="text-subtle py-[5px]">e.g Matt Walsh</span>
+                <span className="text-subtle py-[5px]">e.g Ben Shapiro</span>
               )}
               <ChevronDown className="w-4 h-4 text-subtle ml-auto" />
             </button>
 
             {authorOpen && (
-              <div className="absolute z-20 mt-1 w-full rounded-md border border-line bg-white shadow-lg py-1">
+              <div className="absolute z-20 mt-1 w-full rounded-md border border-line bg-white shadow-lg py-1 max-h-56 overflow-y-auto">
                 {AUTHORS.map((a) => (
                   <button
                     key={a.pid}
@@ -86,7 +112,7 @@ export function PostComposer({
                     className="w-full flex items-center gap-2 px-2.5 py-2 text-sm hover:bg-zinc-50 text-left"
                   >
                     <Avatar name={a.name} size={24} />
-                    <span>{a.pid === CURRENT_USER_PID ? "You (Host)" : a.name}</span>
+                    <span>{authorLabel(a.pid, a.name, a.title)}</span>
                   </button>
                 ))}
               </div>
@@ -114,89 +140,34 @@ export function PostComposer({
           </div>
         </div>
 
-        {/* Add Media */}
-        <div>
-          <label className="block text-sm font-semibold mb-1.5 text-label">Add Media (optional)</label>
-          <div className="rounded border border-dashed border-[#b8b8b8] bg-white px-4 py-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-zinc-400 transition">
-            <UploadIcon className="w-5 h-5 text-label mb-2" />
-            <span className="text-xs font-medium text-label">Upload image or video</span>
-          </div>
-
-          <div className="flex items-center gap-3 my-3">
-            <span className="h-px flex-1 bg-line" />
-            <span className="text-sm font-medium text-muted">or</span>
-            <span className="h-px flex-1 bg-line" />
-          </div>
-
-          <div className="relative">
-            <LinkIcon className="w-4 h-4 text-subtle absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              value={value.embedUrl}
-              onChange={(e) => set({ embedUrl: e.target.value })}
-              placeholder="Paste a Twitter/X or Youtube video link..."
-              className="w-full rounded border border-line bg-white pl-9 pr-3 py-2 text-sm placeholder:text-subtle focus:outline-none focus:ring-2 focus:ring-ink/10 focus:border-zinc-400"
-            />
-          </div>
-        </div>
-
-        {/* Body */}
+        {/* Body — rich text */}
         <div>
           <label className="block text-sm font-semibold mb-1.5 text-label">
             Body <span className="text-danger">*</span>
           </label>
-          {/* Prototype: plain editor. §9 leaves the WYSIWYG choice (TipTap/Lexical/Quill) open. */}
-          <div className="rounded border border-line bg-white overflow-hidden">
-            <div className="flex items-center gap-1 border-b border-line px-2 py-1.5 text-subtle">
-              <ToolbarBtn label="B" className="font-bold" />
-              <ToolbarBtn label="I" className="italic" />
-              <ToolbarBtn label="U" className="underline" />
-              <span className="w-px h-4 bg-line mx-1" />
-              <ToolbarBtn label="❝" />
-              <ToolbarBtn label="• List" />
-              <ToolbarBtn label="🔗" />
-            </div>
-            <textarea
-              value={value.body}
-              onChange={(e) => set({ body: e.target.value })}
-              placeholder="Enter post body content..."
-              rows={5}
-              className="w-full resize-none px-3 py-2 text-sm placeholder:text-subtle focus:outline-none"
-            />
-          </div>
+          <RichTextEditor value={value.body} onChange={(html) => set({ body: html })} />
         </div>
       </div>
 
       {/* Footer actions */}
       <div className="flex items-center gap-2 px-5 py-3 border-t border-line">
-        <Button variant="danger" onClick={onClear}>
-          CANCEL
-        </Button>
         {isEdit ? (
-          <Button variant="primary" className="flex-1">
-            SAVE CHANGES
+          <Button variant="danger" onClick={onDelete} className="gap-1.5">
+            <TrashIcon className="w-4 h-4" />
+            DELETE
           </Button>
         ) : (
-          <>
-            <Button variant="outlineDark" className="flex-1">
-              SAVE DRAFT
-            </Button>
-            <Button variant="primary" className="flex-1">
-              {requireApproval ? "SUBMIT TO REVIEW" : "PUBLISH"}
-            </Button>
-          </>
+          <Button variant="danger" onClick={onClose}>
+            CANCEL
+          </Button>
         )}
+        <Button variant="outlineDark" className="flex-1" onClick={onSecondary}>
+          {secondaryLabel}
+        </Button>
+        <Button variant="primary" className="flex-1" onClick={onPrimary}>
+          {primaryLabel}
+        </Button>
       </div>
     </div>
-  );
-}
-
-function ToolbarBtn({ label, className = "" }: { label: string; className?: string }) {
-  return (
-    <button
-      type="button"
-      className={`min-w-7 h-7 px-1.5 rounded text-xs hover:bg-zinc-100 ${className}`}
-    >
-      {label}
-    </button>
   );
 }

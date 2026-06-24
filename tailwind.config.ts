@@ -10,7 +10,10 @@ const config: Config = {
       colors: {
         // Exact tokens read from Figma frame 142:5747
         canvas: "#f0eeee", // page background (warm gray)
-        feed: "#fafafa", // right feed surface
+        topbar: "#ececec", // global top navigation bar (Figma "Navigation")
+        feed: "#fafafa", // Live Blog Article card surface (Figma)
+        surface: "#f0f0f0", // feed scroll surface + unselected post panel (Figma)
+        panelSel: "#e6e6e6", // selected post panel (Figma)
         ink: "#18181b", // primary text (zinc-900)
         black: "#0a0909", // buttons / headings
         subtle: "#525252", // secondary text

@@ -29,6 +29,8 @@ export function LiveBlogArticle({
   showMenuButton?: boolean;
   onMenuClick?: () => void;
 }) {
+  // body is rich-text HTML; treat tag-only/empty markup as "no body".
+  const hasBody = !!body && body.replace(/<[^>]*>/g, "").trim().length > 0;
   return (
     <article className="relative w-[393px] bg-feed rounded-xl py-8 flex flex-col gap-6">
       {/* Kebab menu — visible whenever the parent decides actions are available */}
@@ -78,21 +80,22 @@ export function LiveBlogArticle({
             <MutedIcon className="w-5 h-5" />
           </span>
         </div>
-      ) : placeholder ? (
+      ) : placeholder && !hasBody ? (
         <p className="px-4 text-base font-normal leading-6 text-muted -mt-2">
           Write the body content...
         </p>
       ) : null}
 
-      {/* Body — 16px / 24px Regular */}
-      {body && (
-        <div className="px-4 text-base font-normal leading-6 text-black whitespace-pre-line">
-          {body}
-        </div>
+      {/* Body — 16px / 24px Regular. Rich-text HTML from the editor. */}
+      {hasBody && (
+        <div
+          className="px-4 text-base font-normal leading-6 text-black [&_p]:my-1 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-blue-700 [&_a]:underline [&_img]:rounded-md [&_img]:my-2"
+          dangerouslySetInnerHTML={{ __html: body as string }}
+        />
       )}
 
       {/* Show more */}
-      {!placeholder && body && (
+      {!placeholder && hasBody && (
         <div className="text-center">
           <button className="text-sm font-normal text-[#5c5c5c] underline">Show more</button>
         </div>

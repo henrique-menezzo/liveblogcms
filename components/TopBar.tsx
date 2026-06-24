@@ -5,7 +5,7 @@ import { Avatar } from "./ui";
 // Global app chrome: breadcrumb (left) · DAILYWIRE wordmark (center) · user (right).
 export function TopBar({ crumbs }: { crumbs?: { label: string; href?: string }[] }) {
   return (
-    <header className="h-12 bg-white border-b border-line flex items-center px-4 sticky top-0 z-30">
+    <header className="h-[53px] bg-topbar border-b border-black/5 flex items-center px-4 sticky top-0 z-30">
       <nav className="flex items-center gap-2 text-sm min-w-0 flex-1">
         {crumbs?.map((c, i) => (
           <span key={i} className="flex items-center gap-2 min-w-0">
