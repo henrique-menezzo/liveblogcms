@@ -17,12 +17,15 @@ export const REVIEW_STATUS_NAME: Record<string, string> = {
 
 // Authors mirror the Figma "Editor view" prototype (all Hosts).
 export const AUTHORS: Author[] = [
-  { pid: "a-1", name: "Paul Snyder", title: "Host" },
-  { pid: "a-2", name: "Ben Shapiro", title: "Host" },
-  { pid: "a-3", name: "Jordan B Peterson", title: "Host" },
+  { pid: "a-1", name: "Paul Snyder", title: "Host", imageURL: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80" },
+  { pid: "a-2", name: "Ben Shapiro", title: "Host", imageURL: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80" },
+  { pid: "a-3", name: "Jordan B Peterson", title: "Host", imageURL: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80" },
   { pid: "a-4", name: "Isabel Brown", title: "Host" },
   { pid: "a-5", name: "Rickelmy", title: null },
 ];
+
+// Resolve a host's avatar from the canonical AUTHORS list by pid.
+export const authorImage = (pid?: string) => AUTHORS.find((a) => a.pid === pid)?.imageURL;
 
 // The signed-in CMS user. You can EDIT your own posts; as an editor you can also
 // REVIEW (approve/reject/publish) other people's posts without editing their content.

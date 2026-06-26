@@ -8,10 +8,11 @@ import { LiveBlogArticle } from "./LiveBlogArticle";
 import { PromotionCardPreview } from "./PromotionCardModal";
 import type { ComposerState } from "./PostComposer";
 import { Fragment } from "react";
-import { AUTHORS, CURRENT_USER_PID } from "@/lib/mock-data";
+import { AUTHORS, CURRENT_USER_PID, authorImage } from "@/lib/mock-data";
 import { canManagePost, formatElapsedShort, formatScheduleBadge, getPostKind, type Ad, type PostKind, type PromotionCard } from "@/lib/post-helpers";
 
-type Scope = "all" | "mine";
+// "all" / "mine", or a specific author's pid.
+type Scope = "all" | "mine" | string;
 type StatusFilter = "all" | "pending" | "published" | "rejected" | "draft" | "scheduled";
 
 export interface PostActions {
@@ -59,6 +60,9 @@ export function PostFeed({
   const feedPromos = promos.filter((p) => p.inFeed);
   const [scope, setScope] = useState<Scope>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  // When the Pending filter is active, order the queue by how long each post
+  // has been waiting: "oldest" = longest-pending first, "newest" = the reverse.
+  const [pendingSort, setPendingSort] = useState<"oldest" | "newest">("oldest");
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const previewRef = useRef<HTMLDivElement | null>(null);
   // Refresh "Pending: Xh ago" badges over time.
@@ -72,6 +76,7 @@ export function PostFeed({
   const scoped = useMemo(() => {
     let list = posts;
     if (scope === "mine") list = list.filter((p) => p.authors.some((a) => a.pid === CURRENT_USER_PID));
+    else if (scope !== "all") list = list.filter((p) => p.authors.some((a) => a.pid === scope));
     return [...list].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
   }, [posts, scope]);
 
@@ -81,10 +86,16 @@ export function PostFeed({
     return c;
   }, [scoped]);
 
-  const filtered = useMemo(
-    () => (statusFilter === "all" ? scoped : scoped.filter((p) => getPostKind(p) === statusFilter)),
-    [scoped, statusFilter]
-  );
+  const filtered = useMemo(() => {
+    const base = statusFilter === "all" ? scoped : scoped.filter((p) => getPostKind(p) === statusFilter);
+    if (statusFilter !== "pending") return base;
+    // Sort by pending age (oldest pendingSince = waiting the longest).
+    return [...base].sort((a, b) => {
+      const ta = a.pendingSince ? new Date(a.pendingSince).getTime() : 0;
+      const tb = b.pendingSince ? new Date(b.pendingSince).getTime() : 0;
+      return pendingSort === "oldest" ? ta - tb : tb - ta;
+    });
+  }, [scoped, statusFilter, pendingSort]);
 
   const total = filtered.length;
   const focusedIndex = focusedPid === null ? 0 : filtered.findIndex((p) => p.pid === focusedPid) + 1;
@@ -124,10 +135,13 @@ export function PostFeed({
             <MegaphoneIcon className="w-4 h-4" /> Promotion Card
           </button>
           <Dropdown
-            label={scope === "all" ? "All posts" : "My posts"}
+            label={
+              scope === "all" ? "All" : scope === "mine" ? "Mine" : AUTHORS.find((a) => a.pid === scope)?.name ?? "All"
+            }
             options={[
-              { value: "all", label: "All posts" },
-              { value: "mine", label: "My posts" },
+              { value: "all", label: "All" },
+              { value: "mine", label: "Mine" },
+              ...AUTHORS.filter((a) => a.pid !== CURRENT_USER_PID).map((a) => ({ value: a.pid, label: a.name })),
             ]}
             value={scope}
             onChange={(v) => setScope(v as Scope)}
@@ -146,6 +160,17 @@ export function PostFeed({
             value={statusFilter}
             onChange={(v) => setStatusFilter(v as StatusFilter)}
           />
+          {statusFilter === "pending" && (
+            <Dropdown
+              label={pendingSort === "oldest" ? "Oldest first" : "Newest first"}
+              options={[
+                { value: "oldest", label: "Oldest first" },
+                { value: "newest", label: "Newest first" },
+              ]}
+              value={pendingSort}
+              onChange={(v) => setPendingSort(v as "oldest" | "newest")}
+            />
+          )}
         </div>
         <div className="flex items-center gap-2 text-sm text-subtle shrink-0">
           <span className="tabular-nums">{focusedIndex} of {total}</span>
@@ -178,7 +203,7 @@ export function PostFeed({
               <span className="text-[11px] font-medium text-muted">Not saved yet</span>
             </div>
             <div className="shadow-[0_6px_20px_rgba(0,0,0,0.10)] rounded-xl">
-              <LiveBlogArticle placeholder time="Just now" author={previewAuthor?.name} title={preview.title} body={preview.body} dark={dark} />
+              <LiveBlogArticle placeholder time="Just now" author={previewAuthor?.name} authorImage={previewAuthor?.imageURL} title={preview.title} body={preview.body} dark={dark} />
             </div>
           </div>
         )}
@@ -301,7 +326,7 @@ function FeedItem({
             <LiveBlogArticle
               time={post.relativeTime}
               author={post.authors[0]?.name}
-              authorImage={post.authors[0]?.imageURL}
+              authorImage={post.authors[0]?.imageURL ?? authorImage(post.authors[0]?.pid)}
               title={post.title}
               body={post.body}
               mediaURL={post.mediaURL}

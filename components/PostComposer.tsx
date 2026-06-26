@@ -100,7 +100,7 @@ export function PostComposer({
             >
               {selected ? (
                 <>
-                  <Avatar name={selected.name} size={28} />
+                  <Avatar name={selected.name} src={selected.imageURL} size={28} />
                   <span className="text-black">{authorLabel(selected.pid, selected.name, selected.title)}</span>
                 </>
               ) : (
@@ -121,7 +121,7 @@ export function PostComposer({
                     }}
                     className="w-full flex items-center gap-2 px-2.5 py-2 text-sm hover:bg-zinc-50 text-left"
                   >
-                    <Avatar name={a.name} size={24} />
+                    <Avatar name={a.name} src={a.imageURL} size={24} />
                     <span>{authorLabel(a.pid, a.name, a.title)}</span>
                   </button>
                 ))}

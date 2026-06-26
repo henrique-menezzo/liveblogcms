@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronDown, DailyWireLogo } from "./icons";
 import { Avatar } from "./ui";
+import { authorImage, CURRENT_USER_PID } from "@/lib/mock-data";
 
 // Global app chrome: breadcrumb (left) · DAILYWIRE wordmark (center) · user (right).
 export function TopBar({ crumbs }: { crumbs?: { label: string; href?: string }[] }) {
@@ -27,7 +28,7 @@ export function TopBar({ crumbs }: { crumbs?: { label: string; href?: string }[]
 
       <div className="flex-1 flex items-center justify-end">
         <button className="flex items-center gap-2 text-sm text-ink hover:bg-zinc-50 rounded-md px-2 py-1">
-          <Avatar name="Paul Snyder" size={24} />
+          <Avatar name="Paul Snyder" src={authorImage(CURRENT_USER_PID)} size={24} />
           <span className="hidden sm:block">Paul Snyder</span>
           <ChevronDown className="w-4 h-4 text-subtle" />
         </button>
