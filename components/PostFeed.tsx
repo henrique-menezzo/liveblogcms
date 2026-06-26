@@ -113,13 +113,13 @@ export function PostFeed({
         <div className="flex items-center gap-3">
           <button
             onClick={onNewPost}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-black text-white px-4 py-2.5 text-xs font-semibold uppercase tracking-wide hover:bg-black/90"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-black text-white px-4 h-10 text-xs font-semibold uppercase tracking-wide hover:bg-black/90"
           >
             <PlusIcon className="w-3.5 h-3.5" /> New Post
           </button>
           <button
             onClick={onAddPromo}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-ink hover:bg-zinc-50"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-4 h-10 text-xs font-semibold uppercase tracking-wide text-ink hover:bg-zinc-50"
           >
             <MegaphoneIcon className="w-4 h-4" /> Promotion Card
           </button>
@@ -377,7 +377,7 @@ function Dropdown({
         type="button"
         onClick={() => setOpen((v) => !v)}
         onBlur={() => setTimeout(() => setOpen(false), 120)}
-        className={`inline-flex items-center gap-2 rounded-lg border border-line bg-white px-3 py-2.5 text-sm hover:bg-zinc-50 ${
+        className={`inline-flex items-center gap-2 rounded-lg border border-line bg-white px-3 h-10 text-sm hover:bg-zinc-50 ${
           danger ? "text-danger font-medium" : "text-black"
         }`}
       >
